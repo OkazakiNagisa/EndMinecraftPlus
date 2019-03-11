@@ -1,46 +1,33 @@
 package luohuayu.EndMinecraftPlus.tasks.attack;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.net.Socket;
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import io.netty.util.internal.ConcurrentSet;
-import org.spacehq.mc.protocol.MinecraftProtocol;
-import org.spacehq.mc.protocol.packet.ingame.client.ClientChatPacket;
-import org.spacehq.mc.protocol.packet.ingame.client.ClientKeepAlivePacket;
-import org.spacehq.mc.protocol.packet.ingame.client.ClientPluginMessagePacket;
-import org.spacehq.mc.protocol.packet.ingame.client.ClientTabCompletePacket;
-import org.spacehq.mc.protocol.packet.ingame.client.player.ClientPlayerChangeHeldItemPacket;
-import org.spacehq.mc.protocol.packet.ingame.client.player.ClientPlayerMovementPacket;
-import org.spacehq.mc.protocol.packet.ingame.client.world.ClientTeleportConfirmPacket;
-import org.spacehq.mc.protocol.packet.ingame.server.ServerJoinGamePacket;
-import org.spacehq.mc.protocol.packet.ingame.server.ServerPluginMessagePacket;
-import org.spacehq.mc.protocol.packet.ingame.server.entity.ServerEntityTeleportPacket;
-import org.spacehq.mc.protocol.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
-import org.spacehq.mc.protocol.packet.ingame.server.window.ServerSetSlotPacket;
-import org.spacehq.packetlib.Client;
-import org.spacehq.packetlib.Session;
-import org.spacehq.packetlib.event.session.ConnectedEvent;
-import org.spacehq.packetlib.event.session.DisconnectedEvent;
-import org.spacehq.packetlib.event.session.DisconnectingEvent;
-import org.spacehq.packetlib.event.session.PacketReceivedEvent;
-import org.spacehq.packetlib.event.session.PacketSentEvent;
-import org.spacehq.packetlib.event.session.SessionListener;
-import org.spacehq.packetlib.packet.Packet;
-import org.spacehq.packetlib.tcp.TcpSessionFactory;
-
 import luohuayu.ACProtocol.AnotherStarAntiCheat;
 import luohuayu.ACProtocol.AntiCheat3;
 import luohuayu.EndMinecraftPlus.Utils;
 import luohuayu.EndMinecraftPlus.proxy.ProxyPool;
 import luohuayu.MCForgeProtocol.MCForge;
+import org.spacehq.mc.protocol.MinecraftProtocol;
+import org.spacehq.mc.protocol.packet.ingame.client.ClientChatPacket;
+import org.spacehq.mc.protocol.packet.ingame.client.ClientPluginMessagePacket;
+import org.spacehq.mc.protocol.packet.ingame.client.player.ClientPlayerMovementPacket;
+import org.spacehq.mc.protocol.packet.ingame.server.ServerJoinGamePacket;
+import org.spacehq.mc.protocol.packet.ingame.server.ServerPluginMessagePacket;
+import org.spacehq.mc.protocol.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
+import org.spacehq.packetlib.Client;
+import org.spacehq.packetlib.Session;
+import org.spacehq.packetlib.event.session.*;
+import org.spacehq.packetlib.packet.Packet;
+import org.spacehq.packetlib.tcp.TcpSessionFactory;
+
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.Socket;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class DistributedBotAttack extends IAttack {
     protected boolean attack_motdbefore;
@@ -255,12 +242,12 @@ public class DistributedBotAttack extends IAttack {
             session.setFlag("join", true);
             Utils.log("Client", "[连接成功][" + username + "]");
             MultiVersionPacket.sendClientSettingPacket(session, "zh_CN");
-            session.send(new ClientPlayerChangeHeldItemPacket(1));
+            MultiVersionPacket.sendClientPlayerChangeHeldItemPacket(session, 1);
         } else if (recvPacket instanceof ServerPlayerPositionRotationPacket) {
             ServerPlayerPositionRotationPacket packet = (ServerPlayerPositionRotationPacket) recvPacket;
             MultiVersionPacket.sendPosPacket(session, packet.getX(), packet.getY(), packet.getZ(), packet.getYaw(), packet.getYaw());
             session.send(new ClientPlayerMovementPacket(true));
-            session.send(new ClientTeleportConfirmPacket(packet.getTeleportId()));
+            MultiVersionPacket.sendClientTeleportConfirmPacket(session, packet);
         }
     }
 }

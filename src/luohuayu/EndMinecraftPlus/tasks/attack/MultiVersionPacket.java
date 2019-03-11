@@ -3,7 +3,9 @@ package luohuayu.EndMinecraftPlus.tasks.attack;
 import org.spacehq.mc.protocol.packet.ingame.client.ClientSettingsPacket;
 import org.spacehq.mc.protocol.packet.ingame.client.ClientTabCompletePacket;
 import org.spacehq.mc.protocol.packet.ingame.client.player.ClientPlayerPositionRotationPacket;
+import org.spacehq.mc.protocol.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
 import org.spacehq.packetlib.Session;
+import org.spacehq.packetlib.packet.Packet;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -63,6 +65,30 @@ public class MultiVersionPacket {
                 packet = (ClientSettingsPacket) constructor.newInstance(locale, 10, parm1Class.getEnumConstants()[0], true, parm2Class.getEnumConstants()[0], true);
             }
             session.send(packet);
+        } catch (Exception e) {}
+    }
+
+    public static void sendClientPlayerChangeHeldItemPacket(Session session, int slot) {
+        try {
+            Class<?> cls = Class.forName("org.spacehq.mc.protocol.packet.ingame.client.player.ClientPlayerChangeHeldItemPacket");
+            Constructor<?> constructor = cls.getConstructor(int.class);
+            Packet packet = (Packet) constructor.newInstance(slot);
+            session.send(packet);
+        } catch (Exception e) {}
+    }
+
+    public static void sendClientTeleportConfirmPacket(Session session, int id) {
+        try {
+            Class<?> cls = Class.forName("org.spacehq.mc.protocol.packet.ingame.client.world.ClientTeleportConfirmPacket");
+            Constructor<?> constructor = cls.getConstructor(int.class);
+            Packet packet = (Packet) constructor.newInstance(id);
+            session.send(packet);
+        } catch (Exception e) {}
+    }
+
+    public static void sendClientTeleportConfirmPacket(Session session, ServerPlayerPositionRotationPacket packet) {
+        try {
+            sendClientTeleportConfirmPacket(session, (int) ServerPlayerPositionRotationPacket.class.getMethod("getTeleportId").invoke(packet));
         } catch (Exception e) {}
     }
 }
